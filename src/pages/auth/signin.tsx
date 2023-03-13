@@ -155,6 +155,7 @@ const SBResetPassword: React.FC<ISBResetPassword> = ({ setResetPassword }) => {
    const [email, setEmail] = useState<string>('')
 
    const handleResetPassword = async () => {
+      console.log(email);
 
       if (!email) {
          toast.error('Please enter your email address.')
@@ -162,7 +163,7 @@ const SBResetPassword: React.FC<ISBResetPassword> = ({ setResetPassword }) => {
       }
 
       const { data, error } = await supabase.auth.resetPasswordForEmail(email, {
-         redirectTo: 'http://localhost:3000/reset-password',
+         redirectTo: 'http://localhost:3000/auth/reset-password',
       })
 
       if (data) {
@@ -182,7 +183,7 @@ const SBResetPassword: React.FC<ISBResetPassword> = ({ setResetPassword }) => {
             setEmail(e.target.value)
          }} />
          <button className="btn btn-sm  btn-primary mt-4"
-            onClick={() => handleResetPassword}>
+            onClick={void handleResetPassword()}>
             Send Reset Link
          </button>
          <button className="text-sm text-gray-500 hover:text-gray-700 mt-4"
