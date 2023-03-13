@@ -1,9 +1,11 @@
-import { type NextPage } from "next";
+import { type GetServerSideProps, type NextPage } from "next";
 import Head from "next/head";
 import { useState } from "react";
 import { CurrentInsulationArray, NewInsulationArray } from "~/utils/helpers";
 import { IoClose } from "react-icons/io5";
 import Layout from "~/components/layout/main";
+import { createServerSupabaseClient } from "@supabase/auth-helpers-nextjs";
+import CustomFormControl from "~/components/common/form-control";
 
 const Home: NextPage = () => {
 
@@ -229,18 +231,25 @@ const Home: NextPage = () => {
 export default Home;
 
 
-interface ICustomFormControl {
-   label: string;
-   children: React.ReactNode;
+export const getServerSideProps: GetServerSideProps = async (ctx) => {
+   // Create authenticated Supabase Client
+   const supabase = createServerSupabaseClient(ctx)
+   // Check if we have a session
+   const {
+      data: { session },
+   } = await supabase.auth.getSession()
+
+   if (!session) {
+      return {
+         redirect: {
+            destination: '/auth/signin',
+            permanent: false,
+         },
+      }
+   }
+
+   return {
+      props: {},
+   }
 }
 
-const CustomFormControl: React.FC<ICustomFormControl> = ({ label, children }) => {
-   return (
-      <div className="form-control w-full max-w-xs">
-         <label className="label py-1">
-            <span className="label-text text-[#8A8BB3]">{label}</span>
-         </label>
-         {children}
-      </div>
-   );
-};

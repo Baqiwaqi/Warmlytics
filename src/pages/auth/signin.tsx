@@ -1,11 +1,9 @@
-import { type GetServerSideProps } from "next/types";
-import { useRouter } from "next/router";
-import Image from "next/image";
-import { useSession, useSupabaseClient } from "@supabase/auth-helpers-react";
 import { createServerSupabaseClient } from "@supabase/auth-helpers-nextjs";
+import { useSession, useSupabaseClient } from "@supabase/auth-helpers-react";
+import { useRouter } from "next/router";
+import { type GetServerSideProps } from "next/types";
 import { useState } from "react";
-import { toast } from "react-toastify";
-import { ToastContainer } from 'react-toastify';
+import { ToastContainer, toast } from "react-toastify";
 
 
 const SignIn: React.FC = () => {
@@ -46,32 +44,36 @@ const SignIn: React.FC = () => {
             {resetPassword
                ? (<SBResetPassword setResetPassword={setResetPassword} />)
                : (<form className="flex flex-col w-full space-y-4" onSubmit={() => handleSignIn}>
-                  <div className="flex flex-col space-y-1">
-                     <label htmlFor="email" className="text-sm font-medium text-gray-700">
-                        Email
+                  <div className="flex flex-col items-center justify-center space-y-2">
+                     <h1 className="text-4xl font-bold text-[#10275A]">Isolator Calculator</h1>
+                  </div>
+                  <div className="form-control w-full">
+                     <label className="label py-1">
+                        <span className="label-text text-[#8A8BB3]">Email</span>
                      </label>
                      <input
                         type="email"
                         name="email"
                         id="email"
-                        className="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-centuristics-orange-200 focus:border-transparent"
+                        className="input input-bordered input-sm w-full"
                      />
                   </div>
-                  <div className="flex flex-col space-y-1">
-                     <label htmlFor="password" className="text-sm font-medium text-gray-700">
-                        Password
+                  <div className="form-control w-full">
+                     <label className="label py-1">
+                        <span className="label-text text-[#8A8BB3]">Password</span>
                      </label>
                      <input
                         type="password"
                         name="password"
                         id="password"
-                        className="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-centuristics-orange-200 focus:border-transparent"
+                        className="input input-bordered input-sm w-full"
                      />
                   </div>
                   <button
                      disabled={loading}
                      type="submit"
-                     className="px-4 py-2 text-white bg-centuristics-orange-500 rounded-lg hover:bg-centuristics-orange-700 focus:outline-none focus:ring-2  disabled:opacity-50"
+
+                     className="btn btn-primary btn-sm w-full"
                   >
                      Sign In
                   </button>
@@ -85,8 +87,6 @@ const SignIn: React.FC = () => {
                >
                   Forgot Password?
                </button>}
-
-
          </div>
       </Layout>
    );
@@ -125,31 +125,21 @@ type Props = {
 
 const Layout: React.FC<Props> = ({ children }) => {
    return (
-      <div className="relative min-h-screen">
-         <Image
-
-            src="/bg-image.jpeg"
-            alt="Background"
-            fill
-            style={{ objectFit: "cover" }}
+      <div className="flex min-h-screen flex-col items-center justify-center relative z-1 bg-gradient-to-tr from-[#10275A] to-[#444572] ">
+         {children}
+         <ToastContainer
+            className="z-50"
+            position="top-right"
+            autoClose={5000}
+            hideProgressBar={false}
+            newestOnTop={false}
+            closeOnClick
+            rtl={false}
+            pauseOnFocusLoss
+            draggable
+            pauseOnHover
+            theme="light"
          />
-         <div className="absolute inset-0 bg-gradient-to-b from-transparent to-black opacity-80"></div>
-         <div className="flex min-h-screen flex-col items-center justify-center relative z-1 ">
-            {children}
-            <ToastContainer
-               className="z-50"
-               position="top-right"
-               autoClose={5000}
-               hideProgressBar={false}
-               newestOnTop={false}
-               closeOnClick
-               rtl={false}
-               pauseOnFocusLoss
-               draggable
-               pauseOnHover
-               theme="light"
-            />
-         </div>
       </div>
    );
 };
