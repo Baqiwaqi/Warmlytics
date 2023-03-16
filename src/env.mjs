@@ -7,9 +7,7 @@ import { z } from "zod";
 const server = z.object({
    DATABASE_URL: z.string().url(),
    NODE_ENV: z.enum(["development", "test", "production"]),
-
    // Add `.min(1) on ID and SECRET if you want to make sure they're not empty
-
 });
 
 /**

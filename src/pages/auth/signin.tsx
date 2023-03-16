@@ -24,13 +24,16 @@ const SignIn: React.FC = () => {
       const formData = new FormData(event.currentTarget);
       const email = formData.get("email");
       const password = formData.get("password");
-      const { error } = await supabase.auth.signInWithPassword({
+      const { error, data } = await supabase.auth.signInWithPassword({
          email: email as string,
          password: password as string,
       })
 
+      console.log(error, data);
+
       if (error) {
          setError(error.message);
+
       }
 
       setLoading(false);
@@ -43,7 +46,7 @@ const SignIn: React.FC = () => {
          <div className="flex flex-col items-center justify-center w-full max-w-lg p-6 space-y-4 bg-white rounded-xl shadow-lg">
             {resetPassword
                ? (<SBResetPassword setResetPassword={setResetPassword} />)
-               : (<form className="flex flex-col w-full space-y-4" onSubmit={() => handleSignIn}>
+               : (<form className="flex flex-col w-full space-y-4" onSubmit={(e) => void handleSignIn(e)}>
                   <div className="flex flex-col items-center justify-center space-y-2">
                      <h1 className="text-4xl font-bold text-[#10275A]">Isolator Calculator</h1>
                   </div>
@@ -102,6 +105,7 @@ export const getServerSideProps: GetServerSideProps = async (ctx) => {
       data: { session },
    } = await supabase.auth.getSession()
 
+
    if (session) {
       return {
          redirect: {
@@ -145,7 +149,6 @@ const Layout: React.FC<Props> = ({ children }) => {
 };
 
 
-
 interface ISBResetPassword {
    setResetPassword: React.Dispatch<React.SetStateAction<boolean>>
 }
@@ -183,7 +186,9 @@ const SBResetPassword: React.FC<ISBResetPassword> = ({ setResetPassword }) => {
             setEmail(e.target.value)
          }} />
          <button className="btn btn-sm  btn-primary mt-4"
-            onClick={void handleResetPassword()}>
+            onClick={() => {
+               void handleResetPassword()
+            }}>
             Send Reset Link
          </button>
          <button className="text-sm text-gray-500 hover:text-gray-700 mt-4"

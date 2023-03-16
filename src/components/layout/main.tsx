@@ -16,8 +16,9 @@ const Layout: React.FC<ILayout> = ({ children }) => {
 
    const handleSignOut = async () => {
       try {
+
          await supabase.auth.signOut()
-         await router.push('/auth/signin')
+         void router.push('/auth/signin')
       } catch (error) {
          console.log('error', error)
       }
@@ -48,14 +49,14 @@ const Layout: React.FC<ILayout> = ({ children }) => {
                         </label>
                      </div>
                      <ul tabIndex={0} className="mt-3 p-2 shadow menu menu-compact dropdown-content bg-base-100 rounded-box w-52">
-                        {/* <li>
+                        <li>
                            <NextLink href={"/profile"} className="justify-between">
                               Profile
                               <span className="badge">New</span>
                            </NextLink>
                         </li>
-                        <li><a>Settings</a></li> */}
-                        <li><a onClick={void handleSignOut}>Logout</a></li>
+                        {/* <li><a>Settings</a></li> */}
+                        <li><a onClick={() => void handleSignOut()}>Logout</a></li>
                      </ul>
                   </div>
                </div>

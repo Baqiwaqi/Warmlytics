@@ -38,6 +38,8 @@ const PasswordResetPage = () => {
    const updateUserPwd = api.auth.updateUserPwd.useMutation()
 
    const onSubmit = async (formData: FormData) => {
+      console.log(formData);
+
       const { password, passwordConfirmation } = formData
       if (!validatePasswordConfirmation(passwordConfirmation, password)) {
          setError("passwordConfirmation", {
@@ -49,11 +51,14 @@ const PasswordResetPage = () => {
 
       await updateUserPwd.mutateAsync({
          newPassword: password,
-      }).then(() => {
+      }).then(async () => {
          toast.success("Password updated")
-         void router.push('/')
+         alert("Password updated")
+         await router.push('/')
       }).catch((err: TRPCError) => {
          toast.error(err.message)
+         alert(err.message)
+
       });
    }
 
@@ -63,7 +68,7 @@ const PasswordResetPage = () => {
             <div className="flex flex-col space-y-2 mt-4">
                <h1 className="text-2xl font-bold">Reset Password</h1>
                <p className="text-sm">Enter your new password</p>
-               <form onSubmit={void handleSubmit(onSubmit)} className="flex flex-col space-y-2 mt-4">
+               <div className="flex flex-col space-y-2 mt-4">
                   <input
                      type="password"
                      placeholder="New Password"
@@ -79,8 +84,13 @@ const PasswordResetPage = () => {
                      {...register("passwordConfirmation")}
                   />
                   {errors.passwordConfirmation && <p className="text-red-500">{errors.passwordConfirmation.message}</p>}
-                  <button type="submit" className="bg-sky-700 text-white rounded-md p-2">Reset Password</button>
-               </form>
+                  <button
+                     onClick={() => void handleSubmit(onSubmit)()}
+                     className="btn btn-primary btn-sm"
+                  >
+                     Reset Password
+                  </button>
+               </div>
             </div>
          </div>
       </div >
