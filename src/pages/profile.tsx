@@ -58,7 +58,6 @@ const ProfilePage = () => {
             toast.error("Something went wrong")
          }
       })
-
    }
 
    return (
@@ -66,18 +65,10 @@ const ProfilePage = () => {
          <div className="flex flex-col justify-center items-center space-y-2 mt-10">
             <div className="card w-8/12 bg-base-100 shadow-xl">
                <div className="card-body">
-                  <span className="text-md font-semibold">Attantion</span>
-                  <span className="text-md font-thin">To use this application you must have a 2FA setup</span>
-               </div>
-            </div>
-
-            <div className="card w-8/12 bg-base-100 shadow-xl">
-               <div className="card-body">
                   <span className="text-md font-semibold">Email</span>
                   <input type="text" value={user?.email} className="input input-bordered w-full  disabled:bg-white" disabled />
                </div>
             </div>
-
 
             <div className="card w-8/12 bg-base-100 shadow-xl">
                <div className="card-body">

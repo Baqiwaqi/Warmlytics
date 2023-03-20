@@ -8,7 +8,7 @@ import { createServerSupabaseClient } from "@supabase/auth-helpers-nextjs";
 import CustomFormControl from "~/components/common/form-control";
 
 const Home: NextPage = () => {
-
+   const [project, setProject] = useState("");
    const [gasPrice, setGasPrice] = useState(1.45);
    const [squeareGasUsage, setSquareGasUsage] = useState(7.5);
 
@@ -82,7 +82,17 @@ const Home: NextPage = () => {
                   </h1>
                </div>
                <div className="flex content-center justify-center space-x-4 pt-4">
-                  <CustomFormControl label="Gas prijs" >
+                  <CustomFormControl label="Project" tooltip="Beschrijving van de woning">
+                     <input
+                        type="text"
+                        value={project}
+                        onChange={(e) => setProject(e.target.value)}
+                        className="input input-bordered input-sm w-full max-w-xs"
+                     />
+                  </CustomFormControl>
+               </div>
+               <div className="flex content-center justify-center space-x-4 pt-4">
+                  <CustomFormControl label="Gas prijs" tooltip="Gebaseerd op prijsplafond van aardgas">
                      <input
                         type="number"
                         step={0.01}
@@ -93,7 +103,7 @@ const Home: NextPage = () => {
                         className="input input-bordered input-sm w-full max-w-xs"
                      />
                   </CustomFormControl>
-                  <CustomFormControl label="Gas gebruik m3/m2" >
+                  <CustomFormControl label="Gas gebruik m3/m2" tooltip="Hoeveelheid gas die je nodig hebt voor het verwarmen op basia van 1 vierkante meter met een isolatiewaarde van 1." >
                      <input
                         type="number"
                         step={0.01}
@@ -104,7 +114,7 @@ const Home: NextPage = () => {
                   </CustomFormControl>
                </div>
                <div className="flex content-center justify-center space-x-4 pt-4">
-                  <CustomFormControl label="Oppervlakte" >
+                  <CustomFormControl label="Oppervlakte" tooltip="Oppervlakt van het element van de schil." >
                      <input
                         type="number"
                         value={surfaceArea}
@@ -112,7 +122,7 @@ const Home: NextPage = () => {
                         className="input input-bordered input-sm w-full max-w-xs"
                      />
                   </CustomFormControl>
-                  <CustomFormControl label="Stookpunten" >
+                  <CustomFormControl label="Stookprofiel" tooltip="Stookprofiel, hiermee geef je een profiel van het stookgedrag. Ik gebruik het hier vooral om aan tegen dat op de bovenverdiepingen niet of weinig wordt gestookt waardoor de temperatuur daar lager zal zijn en het warmteverlies dan ook lager is." >
                      <input
                         type="number"
                         value={stpr}
@@ -135,14 +145,14 @@ const Home: NextPage = () => {
                   </select>
                </CustomFormControl>
                <div className="flex space-x-4 pt-2">
-                  <CustomFormControl label="RC waarde" >
+                  <CustomFormControl label="RC waarde">
                      <input
                         value={currentRC}
                         className="input-sm w-full max-w-xs px-1 disabled:bg-white disabled:font-bold"
                         disabled
                      />
                   </CustomFormControl>
-                  <CustomFormControl label="Gas / Jaar" >
+                  <CustomFormControl label="Gas / Jaar" tooltip="Gasvebruik in m3 per jaar">
                      <input
                         value={gasYearlyCost}
                         className="input-sm w-full max-w-xs px-1 disabled:bg-white disabled:font-bold"
@@ -150,6 +160,8 @@ const Home: NextPage = () => {
                      />
                   </CustomFormControl>
                </div>
+
+               {/* nieuwe situatie */}
                <span className="text-md text-slate-600 font-semibold tracking-tight mt-4">Nieuwe Situatie</span>
                <CustomFormControl label="Materiaal">
                   <select
@@ -164,7 +176,7 @@ const Home: NextPage = () => {
                   </select>
                </CustomFormControl>
                <div className="flex space-x-4 mt-4">
-                  <CustomFormControl label="RC waarde" >
+                  <CustomFormControl label="RC waarde" tooltip="R-waarde nadat de isolatie verbeterd is.">
                      <input
                         value={rVerb}
                         className="input-sm w-full max-w-xs px-1 disabled:bg-white disabled:font-bold"
@@ -172,7 +184,7 @@ const Home: NextPage = () => {
                      />
                   </CustomFormControl>
 
-                  <CustomFormControl label="Gas / Jaar" >
+                  <CustomFormControl label="Gas / Jaar" tooltip="Warmteverlies in m3 per jaar na verbeteringen.">
                      <input
                         value={gasYearImprovement}
                         className="input-sm w-full max-w-xs px-1 disabled:bg-white disabled:font-bold"
@@ -190,7 +202,7 @@ const Home: NextPage = () => {
          <div className="modal">
             <div className="modal-box p-8 justify-center content-center">
                <div className="flex justify-between">
-                  <h3 className="font-bold text-lg text-[#10275A]">Huidige situatie</h3>
+                  <h3 className="font-bold text-lg text-[#10275A]">Berekeningen {project}</h3>
                   <label htmlFor="my-modal" className="btn btn-ghost btn-sm">
                      <IoClose className="w-5 h-5" />
                   </label>
@@ -224,7 +236,7 @@ const Home: NextPage = () => {
                </div>
             </div>
          </div >
-      </Layout>
+      </Layout >
    );
 };
 

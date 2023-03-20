@@ -62,7 +62,7 @@ const Layout: React.FC<ILayout> = ({ children }) => {
                </div>
             </div>
             {/* Content */}
-            <div className="flex flex-col min-h-[96vh] bg-base-200">
+            <div className="flex flex-col min-h-[96vh] bg-base-100">
                {children}
                <ToastContainer
                   className="z-50"

@@ -14,11 +14,11 @@ const drawerLinks: LinksProps[] = [
       label: "Dashboard",
       href: "/",
    },
-   {
-      icon: <MdOutlineSettings />,
-      label: "Settings",
-      href: "/settings",
-   },
+   // {
+   //    icon: <MdOutlineSettings />,
+   //    label: "Settings",
+   //    href: "/settings",
+   // },
 ];
 
 export default drawerLinks;
