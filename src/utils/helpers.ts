@@ -53,8 +53,8 @@ export type NewInsulation = {
    id: number;
    code: string;
    name: string;
-   rVerb: number;
-   unknown: number;
+   rc: number;
+   ipv: number;
    cost: number;
 }
 
@@ -63,32 +63,32 @@ export const NewInsulationArray: NewInsulation[] = [
       id: 1,
       code: "V++",
       name: "Glas HR++ ",
-      rVerb: 1,
-      unknown: 0,
+      rc: 1,
+      ipv: 0,
       cost: 250
    },
    {
       id: 2,
       code: "VVG",
       name: "Glas Vacuum",
-      rVerb: 2,
-      unknown: 0,
+      rc: 2,
+      ipv: 0,
       cost: 500
    },
    {
       id: 3,
       code: "mis",
       name: "Muurisolatie Schuim",
-      rVerb: 1.2,
-      unknown: 1,
+      rc: 1.2,
+      ipv: 1,
       cost: 28
    },
    {
       id: 4,
       code: "MI6",
       name: "Muurisolatie 6cm",
-      rVerb: 1.4,
-      unknown: 1,
+      rc: 1.4,
+      ipv: 1,
       cost: 30
    }
 ];
