@@ -101,17 +101,19 @@ const Home: NextPage = () => {
             <link rel="icon" href="/favicon.ico" />
          </Head>
          <main className="flex min-h-screen flex-col items-center justify-start bg-base-100">
-            <div className="flex w-full content-end justify-end p-4">
+            <div className="flex w-full content-end justify-end">
                <NextLink href="/settings/insulation">
-                  <button className="btn btn-ghost gap-2"><SlSettings className="text-2xl text-[#10275A]" /> </button>
+                  <button className="btn btn-ghost gap-2">
+                     <SlSettings className="text-2xl text-[#10275A]" />
+                  </button>
                </NextLink>
             </div>
-            <div className="container card bg-base-100 w-96 flex flex-col p-8">
-               <div className="flex content-center justify-center">
-                  <h1 className="text-2xl text-[#10275A] font-semibold tracking-tight">
-                     Isolatie Calculator
-                  </h1>
-               </div>
+            <div className="flex content-center justify-center">
+               <h1 className="text-2xl text-[#10275A] font-semibold tracking-tight">
+                  Isolatie Calculator
+               </h1>
+            </div>
+            <div className="container card bg-base-100 w-96 flex flex-col py-4 px-8">
                <div className="flex content-center justify-center space-x-4 pt-4">
                   <CustomFormControl label="Project" tooltip="Beschrijving van de woning">
                      <input

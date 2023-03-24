@@ -6,7 +6,10 @@ import { z } from "zod";
  */
 const server = z.object({
    DATABASE_URL: z.string().url(),
+   SHADOW_DATABASE_URL: z.string().url(),
    NODE_ENV: z.enum(["development", "test", "production"]),
+   NEXT_PUBLIC_SUPABASE_URL: z.string().url(),
+   NEXT_PUBLIC_SUPABASE_ANON_KEY: z.string(),
    // Add `.min(1) on ID and SECRET if you want to make sure they're not empty
 });
 
@@ -26,7 +29,10 @@ const client = z.object({
  */
 const processEnv = {
    DATABASE_URL: process.env.DATABASE_URL,
+   SHADOW_DATABASE_URL: process.env.SHADOW_DATABASE_URL,
    NODE_ENV: process.env.NODE_ENV,
+   NEXT_PUBLIC_SUPABASE_URL: process.env.NEXT_PUBLIC_SUPABASE_URL,
+   NEXT_PUBLIC_SUPABASE_ANON_KEY: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
 };
 
 // Don't touch the part below
