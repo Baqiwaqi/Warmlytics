@@ -2,10 +2,12 @@ import { type GetServerSideProps, type NextPage } from "next";
 import Head from "next/head";
 import { CurrentInsulationArray, NewInsulationArray } from "~/utils/helpers";
 import { IoClose } from "react-icons/io5";
+import { SlSettings } from "react-icons/sl";
 import Layout from "~/components/layout/main";
 import { createServerSupabaseClient } from "@supabase/auth-helpers-nextjs";
 import CustomFormControl from "~/components/common/form-control";
 import { useForm } from "react-hook-form";
+import NextLink from "next/link";
 
 type InsulationProps = {
    project: string;
@@ -99,6 +101,11 @@ const Home: NextPage = () => {
             <link rel="icon" href="/favicon.ico" />
          </Head>
          <main className="flex min-h-screen flex-col items-center justify-start bg-base-100">
+            <div className="flex w-full content-end justify-end p-4">
+               <NextLink href="/settings/insulation">
+                  <button className="btn btn-ghost gap-2"><SlSettings className="text-2xl text-[#10275A]" /> </button>
+               </NextLink>
+            </div>
             <div className="container card bg-base-100 w-96 flex flex-col p-8">
                <div className="flex content-center justify-center">
                   <h1 className="text-2xl text-[#10275A] font-semibold tracking-tight">
