@@ -125,8 +125,8 @@ const Home: NextPage = () => {
       setValue("tvt", tvt);
    };
 
-   const onSubmit = (data: InsulationProps) => {
-      sendEmail.mutateAsync({
+   const onSubmit = async (data: InsulationProps) => {
+      await sendEmail.mutateAsync({
          email: data.email,
          projectName: data.project,
          currentMaterial: data.matDescription,
