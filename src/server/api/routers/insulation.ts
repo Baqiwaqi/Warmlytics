@@ -5,7 +5,6 @@ import { type BetterInsulation, type CurrentInsulation } from "@prisma/client";
 import { TRPCError } from "@trpc/server";
 import Mailjet from "node-mailjet";
 import { z } from "zod";
-import { env } from "~/env.mjs";
 
 import {
    createTRPCRouter,
@@ -250,6 +249,8 @@ export const insulationRouter = createTRPCRouter({
             console.log(result.body)
             return result.body;
          }).catch((err) => {
+            console.log(err);
+
             console.log(err.statusCode)
             throw new TRPCError({
                message: err.message as string,
