@@ -74,7 +74,15 @@ const Home: NextPage = () => {
       setValue("newMaterialCost", newInsulation?.[0]?.squarePrice || 0);
    }, [currentInsulation, isFetched, newInsulation, setValue]);
 
-   if (currentLoading || betterLoading) return <div>Loading...</div>;
+   if (currentLoading || betterLoading) {
+      return (
+         <Layout>
+            <div className="flex flex-col items-center justify-center h-screen">
+               <span className="text-2xl font-semibold">Loading...</span>
+            </div>
+         </Layout>
+      )
+   }
 
    const gasYearlyCost = (watch("squeareGasUsage") * watch("surfaceArea") / watch("currentRC") * watch("stpr"))
    const gasYearImprovement = (watch("squeareGasUsage") * watch("surfaceArea") / watch("rVerb") * watch("stpr"))
