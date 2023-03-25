@@ -5,12 +5,13 @@ import { type BetterInsulation, type CurrentInsulation } from "@prisma/client";
 import { TRPCError } from "@trpc/server";
 import Mailjet from "node-mailjet";
 import { z } from "zod";
-import { env } from "~/env.mjs";
 
 import {
    createTRPCRouter,
    protectedProcedure,
 } from "~/server/api/trpc";
+
+const mailjet = Mailjet.apiConnect(`${process.env.MJ_API_KEY as string}`, `${process.env.MJ_API_SECRET as string}`);
 
 export const insulationRouter = createTRPCRouter({
    createCurrentInsulation: protectedProcedure.input(
@@ -203,7 +204,6 @@ export const insulationRouter = createTRPCRouter({
    ).mutation(async ({ input }) => {
       console.log("sendResultsToEmail");
 
-      const mailjet = Mailjet.apiConnect(`${process.env.MJ_API_KEY as string}`, `${process.env.MJ_API_SECRET as string}`);
 
       const { email } = input;
 
@@ -249,6 +249,8 @@ export const insulationRouter = createTRPCRouter({
             console.log(result.body)
             return result.body;
          }).catch((err) => {
+            console.log(err);
+
             console.log(err.statusCode)
             throw new TRPCError({
                message: err.message as string,
