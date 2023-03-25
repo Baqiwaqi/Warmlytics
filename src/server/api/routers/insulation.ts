@@ -11,7 +11,6 @@ import {
    protectedProcedure,
 } from "~/server/api/trpc";
 
-const mailjet = Mailjet.apiConnect(`${process.env.MJ_API_KEY as string}`, `${process.env.MJ_API_SECRET as string}`);
 
 export const insulationRouter = createTRPCRouter({
    createCurrentInsulation: protectedProcedure.input(
@@ -203,7 +202,7 @@ export const insulationRouter = createTRPCRouter({
       })
    ).mutation(async ({ input }) => {
       console.log("sendResultsToEmail");
-
+      const mailjet = Mailjet.apiConnect(`${process.env.MJ_API_KEY as string}`, `${process.env.MJ_API_SECRET as string}`);
 
       const { email } = input;
 
