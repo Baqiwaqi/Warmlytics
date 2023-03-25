@@ -203,7 +203,7 @@ export const insulationRouter = createTRPCRouter({
    ).mutation(async ({ input }) => {
       console.log("sendResultsToEmail");
 
-      const mailjet = Mailjet.apiConnect(`${env.MJ_API_KEY}`, `${env.MJ_API_SECRET}`);
+      const mailjet = Mailjet.apiConnect(`${process.env.MJ_API_KEY as string}`, `${process.env.MJ_API_SECRET as string}`);
 
       const { email } = input;
 
@@ -213,8 +213,8 @@ export const insulationRouter = createTRPCRouter({
             "Messages": [
                {
                   "From": {
-                     "Email": `${env.MJ_FROM_EMAIL}`,
-                     "Name": `${env.MJ_FROM_NAME}`
+                     "Email": `${process.env.MJ_FROM_EMAIL as string}`,
+                     "Name": `${process.env.MJ_FROM_NAME as string}`
                   },
                   "To": [
                      {

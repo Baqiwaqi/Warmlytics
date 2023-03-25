@@ -125,8 +125,6 @@ const Home: NextPage = () => {
       setValue("tvt", tvt);
    };
 
-
-
    const onSubmit = (data: InsulationProps) => {
       sendEmail.mutateAsync({
          email: data.email,
@@ -140,7 +138,7 @@ const Home: NextPage = () => {
       }).then(() => {
          toast.success("Email sent!");
       }).catch((err) => {
-         toast.error(err as string);
+         toast.error("Something went wrong!")
       })
    };
 
