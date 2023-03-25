@@ -137,7 +137,7 @@ const Home: NextPage = () => {
          paybackPeriod: data.tvt,
       }).then(() => {
          toast.success("Email sent!");
-      }).catch((err) => {
+      }).catch(() => {
          toast.error("Something went wrong!")
       })
    };
