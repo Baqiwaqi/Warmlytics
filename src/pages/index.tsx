@@ -70,6 +70,8 @@ const Home: NextPage = () => {
    useEffect(() => {
       if (!isFetched) return;
       setValue("currentRC", currentInsulation?.[0]?.rc || 0);
+      setValue("matDescription", currentInsulation?.[0]?.description || "");
+      setValue("newMatDescription", newInsulation?.[0]?.description || "");
       setValue("rVerb", newInsulation?.[0]?.rc || 0);
       setValue("newMaterialCost", newInsulation?.[0]?.squarePrice || 0);
    }, [currentInsulation, isFetched, newInsulation, setValue]);
