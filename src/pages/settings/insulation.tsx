@@ -92,7 +92,7 @@ const CurrentInsulation = () => {
    return (
       <div className="flex flex-col">
          {/* <span className="text-[#8A8BB3]">Huidige Isolatie</span> */}
-         <CurrentInsulationForm isEdit={false} refetch={() => null} />
+         <CurrentInsulationForm isEdit={false} refetch={refetch} />
          <table className="table table-compact w-full mt-4">
             <thead>
                <tr>
@@ -308,26 +308,27 @@ const ImpoveInsulation = () => {
 
    return (
       <div className="flex flex-col">
-         <BetterInsulationForm isEdit={false} refetch={() => null} />
+         <BetterInsulationForm isEdit={false} refetch={refetch} />
          <table className="table table-compact w-full mt-4">
             <thead>
                <tr>
-                  <th>Code</th>
-                  <th>Description</th>
+                  <th>Naam</th>
+                  {/* gidden when snmall */}
+                  <th className="hidden md:table-cell">Omschrijving</th>
                   <th>RC</th>
                   <th>IPV</th>
-                  <th>Start Price</th>
-                  <th>Square Price</th>
-                  <th>Actions</th>
+                  <th>Start Prijs</th>
+                  <th>Prijs m2</th>
+                  <th></th>
                </tr>
             </thead>
             <tbody>
                {Number(betterInsulation?.length) > 0 ? betterInsulation?.map((item) => (
                   <tr key={item.id}>
                      <td>{item.code}</td>
-                     <td>{item.description}</td>
+                     <td className="hidden md:table-cell">{item.description}</td>
                      <td>{item.rc}</td>
-                     <td>{item.ipv}</td>
+                     <td>{item.ipv === 1 ? <span className="badge badge-success">Yes</span> : <span className="badge badge-error">No</span>}</td>
                      <td>{item.startPrice}</td>
                      <td>{item.squarePrice}</td>
                      <td>
@@ -375,7 +376,7 @@ const BetterInsulationForm: React.FC<IBetterInsulationForm> = ({ isEdit, current
          code: currentInsulation?.code,
          description: currentInsulation?.description,
          rc: currentInsulation?.rc,
-         ipv: Number(currentInsulation?.ipv),
+         ipv: Number(currentInsulation?.ipv) ?? 0,
          startPrice: currentInsulation?.startPrice,
          squarePrice: currentInsulation?.squarePrice,
       }

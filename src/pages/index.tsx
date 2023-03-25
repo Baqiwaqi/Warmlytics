@@ -1,6 +1,6 @@
 import { type GetServerSideProps, type NextPage } from "next";
 import Head from "next/head";
-import { CurrentInsulationArray, NewInsulationArray } from "~/utils/helpers";
+// import { CurrentInsulationArray, NewInsulationArray } from "~/utils/helpers";
 import { IoClose } from "react-icons/io5";
 import { SlSettings } from "react-icons/sl";
 import Layout from "~/components/layout/main";
@@ -8,6 +8,8 @@ import { createServerSupabaseClient } from "@supabase/auth-helpers-nextjs";
 import CustomFormControl from "~/components/common/form-control";
 import { useForm } from "react-hook-form";
 import NextLink from "next/link";
+import { api } from "~/utils/api";
+import { useEffect } from "react";
 
 type InsulationProps = {
    project: string;
@@ -15,10 +17,10 @@ type InsulationProps = {
    squeareGasUsage: number;
    surfaceArea: number;
    stpr: number;
-   matCode: number;
+   matCode: string;
    currentRC: number;
    gasYearlyCost: number;
-   newMatCode: number;
+   newMatCode: string;
    rVerb: number;
    gasYearImprovement: number;
    newMaterialCost: number;
@@ -29,26 +31,23 @@ type InsulationProps = {
 };
 
 const Home: NextPage = () => {
+   const { data: currentInsulation } = api.insulation.getAllCurrentInsulation.useQuery();
+   const { data: newInsulation } = api.insulation.getAllBetterInsulation.useQuery();
 
-   const {
-      register,
-      // handleSubmit,
-      watch,
-      setValue,
-   } = useForm<InsulationProps>({
+   const { register, watch, setValue, } = useForm<InsulationProps>({
       defaultValues: {
          project: "",
          gasPrice: 1.45,
          squeareGasUsage: 7.5,
          surfaceArea: 10,
          stpr: 1,
-         matCode: 1,
-         currentRC: CurrentInsulationArray[0]?.rc || 0,
+         matCode: "",
+         currentRC: currentInsulation?.[0]?.rc || 0,
          gasYearlyCost: 0,
-         newMatCode: 1,
-         rVerb: NewInsulationArray[0]?.rc,
+         newMatCode: "",
+         rVerb: newInsulation?.[0]?.rc,
          gasYearImprovement: 0,
-         newMaterialCost: NewInsulationArray[0]?.cost,
+         newMaterialCost: newInsulation?.[0]?.squarePrice || 0,
          gasSaving: 0,
          resultSavings: 0,
          calculatedCost: 0,
@@ -56,25 +55,31 @@ const Home: NextPage = () => {
       },
    });
 
+   useEffect(() => {
+      setValue("currentRC", currentInsulation?.[0]?.rc || 0);
+      setValue("rVerb", newInsulation?.[0]?.rc || 0);
+      setValue("newMaterialCost", newInsulation?.[0]?.squarePrice || 0);
+   }, [currentInsulation, newInsulation, setValue]);
+
 
    const gasYearlyCost = (watch("squeareGasUsage") * watch("surfaceArea") / watch("currentRC") * watch("stpr"))
    const gasYearImprovement = (watch("squeareGasUsage") * watch("surfaceArea") / watch("rVerb") * watch("stpr"))
 
    const handleMatCodeChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-      setValue("matCode", Number(e.target.value));
-      const mappedRc = CurrentInsulationArray.find((item) => item.id === Number(e.target.value))?.rc;
+      setValue("matCode", e.target.value);
+      const mappedRc = currentInsulation?.find((item) => item.id === e.target.value)?.rc;
       setValue("currentRC", mappedRc || 0);
       const cost = watch("squeareGasUsage") * watch("surfaceArea") / (mappedRc || 0) * watch("stpr")
       setValue("gasYearlyCost", cost);
    };
 
    const handleNewMatCodeChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-      const item = NewInsulationArray.find((item) => item.id === Number(e.target.value));
+      const item = newInsulation?.find((item) => item.id === e.target.value);
       const rVerb = Number(item?.rc) + (watch("currentRC") * Number(item?.ipv))
-      const nMaterialCost = NewInsulationArray.find((item) => item.id === Number(e.target.value))?.cost;
+      const nMaterialCost = newInsulation?.find((item) => item.id === e.target.value)?.squarePrice;
       const cost = watch("squeareGasUsage") * watch("surfaceArea") / (rVerb || 0) * watch("stpr")
 
-      setValue("newMatCode", Number(e.target.value));
+      setValue("newMatCode", e.target.value);
       setValue("rVerb", rVerb || 0);
       setValue("newMaterialCost", nMaterialCost || 0);
       setValue("gasYearImprovement", cost);
@@ -168,7 +173,7 @@ const Home: NextPage = () => {
 
                      }}
                      className="select select-bordered select-sm w-full max-w-xs">
-                     {CurrentInsulationArray.map((item) => (
+                     {currentInsulation?.map((item) => (
                         <option
                            key={item.id}
                            value={item.id}
@@ -177,7 +182,7 @@ const Home: NextPage = () => {
                               setValue("currentRC", item.rc);
                            }}
                         >
-                           {item.name}
+                           {item.code}
                         </option>
                      ))}
                   </select>
@@ -207,13 +212,13 @@ const Home: NextPage = () => {
                      value={watch("newMatCode")}
                      onChange={(e) => handleNewMatCodeChange(e)}
                      className="select select-bordered select-sm w-full max-w-xs">
-                     {NewInsulationArray.map((item) => (
+                     {newInsulation?.map((item) => (
                         <option key={item.id} value={item.id} onClick={() => {
                            setValue("newMatCode", item.id);
                            const rVerb = item.rc + (watch("currentRC") * item.ipv);
                            setValue("rVerb", rVerb);
                         }}>
-                           {item.name}
+                           {item.code}
                         </option>
                      ))}
                   </select>
