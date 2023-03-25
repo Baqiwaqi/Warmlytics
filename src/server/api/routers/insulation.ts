@@ -3,7 +3,9 @@
 /* eslint-disable @typescript-eslint/no-unsafe-return */
 import { type BetterInsulation, type CurrentInsulation } from "@prisma/client";
 import { TRPCError } from "@trpc/server";
+import Mailjet from "node-mailjet";
 import { z } from "zod";
+import { env } from "~/env.mjs";
 
 import {
    createTRPCRouter,
@@ -186,5 +188,71 @@ export const insulationRouter = createTRPCRouter({
             code: "INTERNAL_SERVER_ERROR"
          });
       })
+   }),
+   sendResultsToEmail: protectedProcedure.input(
+      z.object({
+         email: z.string().email(),
+         projectName: z.string(),
+         currentMaterial: z.string(),
+         betterMaterial: z.string(),
+         savingsGas: z.number(),
+         overallSavings: z.number(),
+         calculatedCost: z.number(),
+         paybackPeriod: z.number(),
+      })
+   ).mutation(async ({ input }) => {
+
+      const mailjet = Mailjet.apiConnect(`${env.MJ_API_KEY}`, `${env.MJ_API_SECRET}`);
+
+      const { email } = input;
+
+      return await mailjet
+         .post("send", { 'version': 'v3.1' })
+         .request({
+            "Messages": [
+               {
+                  "From": {
+                     "Email": `${env.MJ_FROM_EMAIL}`,
+                     "Name": `${env.MJ_FROM_NAME}`
+                  },
+                  "To": [
+                     {
+                        "Email": `${email}`,
+                        "Name": `${email}`
+                     }
+                  ],
+                  "Subject": `Resultaten ${input.projectName}`,
+                  "TextPart": "Resultaten",
+                  "HTMLPart": `<h3> Beste ${email}, </h3>
+                     <br/> Uw resultaten zijn berekend. <br /> <br />
+                     <strong> Projectnaam: </strong> ${input.projectName}
+                     <br />
+                     <strong>Huidige isolatie materiaal: </strong> ${input.currentMaterial}
+                     <br />
+                     <strong>Beter isolatie materiaal: </strong> ${input.betterMaterial}
+                     <br />
+                     <strong>Besparing gas: </strong> ${input.savingsGas.toFixed(2)} m3
+                     <br />
+                     <strong>Totale besparing: </strong> ${input.overallSavings.toFixed(2)},- per jaar
+                     <br />
+                     <strong>Kosten: </strong> ${input.calculatedCost.toFixed(2)},- eenmalig
+                     <br />
+                     <strong>Terugverdientijd: </strong> ${input.paybackPeriod.toFixed(1)} jaar
+                     <br /> <br />
+                           Met vriendelijke groet, <br /><br />
+                     Isolatie Calculator <br /> `,
+                  "CustomID": "AppGettingStartedTest",
+               }
+            ]
+         }).then((result) => {
+            console.log(result.body)
+            return result.body;
+         }).catch((err) => {
+            console.log(err.statusCode)
+            throw new TRPCError({
+               message: err.message as string,
+               code: "INTERNAL_SERVER_ERROR"
+            })
+         });
    }),
 });

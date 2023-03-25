@@ -3,10 +3,10 @@
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
 import { Dialog, Transition } from "@headlessui/react";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { type BetterInsulation, CurrentInsulation } from "@prisma/client";
+import { CurrentInsulation, type BetterInsulation } from "@prisma/client";
 import { createServerSupabaseClient } from "@supabase/auth-helpers-nextjs";
+import { type GetServerSideProps, type NextPage } from "next";
 import NextLink from "next/link";
-import { type GetServerSideProps, type NextPage } from "next/types";
 import { Fragment, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { IoIosArrowBack } from "react-icons/io";

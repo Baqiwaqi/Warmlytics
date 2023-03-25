@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/no-unsafe-call */
+/* eslint-disable @typescript-eslint/no-unsafe-member-access */
 import { type GetServerSideProps, type NextPage } from "next";
 import Head from "next/head";
 // import { CurrentInsulationArray, NewInsulationArray } from "~/utils/helpers";
@@ -10,6 +12,7 @@ import { useForm } from "react-hook-form";
 import NextLink from "next/link";
 import { api } from "~/utils/api";
 import { useEffect } from "react";
+import { toast } from "react-toastify";
 
 type InsulationProps = {
    project: string;
@@ -18,9 +21,11 @@ type InsulationProps = {
    surfaceArea: number;
    stpr: number;
    matCode: string;
+   matDescription: string;
    currentRC: number;
    gasYearlyCost: number;
    newMatCode: string;
+   newMatDescription: string;
    rVerb: number;
    gasYearImprovement: number;
    newMaterialCost: number;
@@ -28,13 +33,17 @@ type InsulationProps = {
    resultSavings: number;
    calculatedCost: number;
    tvt: number;
+   email: string;
 };
 
 const Home: NextPage = () => {
-   const { data: currentInsulation } = api.insulation.getAllCurrentInsulation.useQuery();
-   const { data: newInsulation } = api.insulation.getAllBetterInsulation.useQuery();
+   //Fetch data for materials
+   const { data: currentInsulation, isLoading: currentLoading, isFetched } = api.insulation.getAllCurrentInsulation.useQuery();
+   const { data: newInsulation, isLoading: betterLoading } = api.insulation.getAllBetterInsulation.useQuery();
 
-   const { register, watch, setValue, } = useForm<InsulationProps>({
+   const sendEmail = api.insulation.sendResultsToEmail.useMutation();
+
+   const { register, watch, setValue, handleSubmit } = useForm<InsulationProps>({
       defaultValues: {
          project: "",
          gasPrice: 1.45,
@@ -42,9 +51,11 @@ const Home: NextPage = () => {
          surfaceArea: 10,
          stpr: 1,
          matCode: "",
+         matDescription: "",
          currentRC: currentInsulation?.[0]?.rc || 0,
          gasYearlyCost: 0,
          newMatCode: "",
+         newMatDescription: "",
          rVerb: newInsulation?.[0]?.rc,
          gasYearImprovement: 0,
          newMaterialCost: newInsulation?.[0]?.squarePrice || 0,
@@ -52,39 +63,47 @@ const Home: NextPage = () => {
          resultSavings: 0,
          calculatedCost: 0,
          tvt: 0,
+         email: "",
       },
    });
 
    useEffect(() => {
+      if (!isFetched) return;
       setValue("currentRC", currentInsulation?.[0]?.rc || 0);
       setValue("rVerb", newInsulation?.[0]?.rc || 0);
       setValue("newMaterialCost", newInsulation?.[0]?.squarePrice || 0);
-   }, [currentInsulation, newInsulation, setValue]);
+   }, [currentInsulation, isFetched, newInsulation, setValue]);
 
+   if (currentLoading || betterLoading) return <div>Loading...</div>;
 
    const gasYearlyCost = (watch("squeareGasUsage") * watch("surfaceArea") / watch("currentRC") * watch("stpr"))
    const gasYearImprovement = (watch("squeareGasUsage") * watch("surfaceArea") / watch("rVerb") * watch("stpr"))
 
    const handleMatCodeChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-      setValue("matCode", e.target.value);
       const mappedRc = currentInsulation?.find((item) => item.id === e.target.value)?.rc;
-      setValue("currentRC", mappedRc || 0);
+      const materialDescription = currentInsulation?.find((item) => item.id === e.target.value)?.description;
       const cost = watch("squeareGasUsage") * watch("surfaceArea") / (mappedRc || 0) * watch("stpr")
+
+      setValue("matCode", e.target.value);
+      setValue("matDescription", materialDescription || "");
+      setValue("currentRC", mappedRc || 0);
       setValue("gasYearlyCost", cost);
    };
 
    const handleNewMatCodeChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+      setValue("newMatCode", e.target.value);
       const item = newInsulation?.find((item) => item.id === e.target.value);
       const rVerb = Number(item?.rc) + (watch("currentRC") * Number(item?.ipv))
+      const nMaterialDescription = newInsulation?.find((item) => item.id === e.target.value)?.description;
       const nMaterialCost = newInsulation?.find((item) => item.id === e.target.value)?.squarePrice;
       const cost = watch("squeareGasUsage") * watch("surfaceArea") / (rVerb || 0) * watch("stpr")
 
       setValue("newMatCode", e.target.value);
+      setValue("newMatDescription", nMaterialDescription || "");
       setValue("rVerb", rVerb || 0);
       setValue("newMaterialCost", nMaterialCost || 0);
       setValue("gasYearImprovement", cost);
    };
-
 
    const calculateResults = () => {
       const gasSaving = (gasYearlyCost - gasYearImprovement)
@@ -96,6 +115,25 @@ const Home: NextPage = () => {
       setValue("resultSavings", resultSavings);
       setValue("calculatedCost", calculatedCost);
       setValue("tvt", tvt);
+   };
+
+
+
+   const onSubmit = (data: InsulationProps) => {
+      sendEmail.mutateAsync({
+         email: data.email,
+         projectName: data.project,
+         currentMaterial: data.matDescription,
+         betterMaterial: data.newMatDescription,
+         savingsGas: data.gasSaving,
+         overallSavings: data.resultSavings,
+         calculatedCost: data.calculatedCost,
+         paybackPeriod: data.tvt,
+      }).then(() => {
+         toast.success("Email sent!");
+      }).catch(() => {
+         toast.error("Something went wrong!");
+      })
    };
 
    return (
@@ -190,14 +228,14 @@ const Home: NextPage = () => {
                <div className="flex space-x-4 pt-2">
                   <CustomFormControl label="RC waarde">
                      <input
-                        value={watch("currentRC")}
+                        value={watch("currentRC")?.toFixed(2)}
                         className="input-sm w-full max-w-xs px-1 disabled:bg-white disabled:font-bold"
                         disabled
                      />
                   </CustomFormControl>
                   <CustomFormControl label="Gas / Jaar" tooltip="Gasvebruik in m3 per jaar">
                      <input
-                        value={gasYearlyCost}
+                        value={gasYearlyCost.toFixed(2)}
                         className="input-sm w-full max-w-xs px-1 disabled:bg-white disabled:font-bold"
                         disabled
                      />
@@ -226,7 +264,7 @@ const Home: NextPage = () => {
                <div className="flex space-x-4 mt-4">
                   <CustomFormControl label="RC waarde" tooltip="R-waarde nadat de isolatie verbeterd is.">
                      <input
-                        value={watch("rVerb")}
+                        value={watch("rVerb")?.toFixed(2)}
                         className="input-sm w-full max-w-xs px-1 disabled:bg-white disabled:font-bold"
                         disabled
                      />
@@ -234,7 +272,7 @@ const Home: NextPage = () => {
 
                   <CustomFormControl label="Gas / Jaar" tooltip="Warmteverlies in m3 per jaar na verbeteringen.">
                      <input
-                        value={gasYearImprovement}
+                        value={gasYearImprovement.toFixed(2)}
                         className="input-sm w-full max-w-xs px-1 disabled:bg-white disabled:font-bold"
                         disabled
                      />
@@ -277,10 +315,19 @@ const Home: NextPage = () => {
                      type="email"
                      className="input input-bordered input-sm w-full"
                      placeholder="naam@email.nl"
+                     {...register("email")}
                   />
                </div>
                <div className="modal-action w-full">
-                  <label htmlFor="my-modal" className="btn btn-primary btn-sm w-full">Verstuur resultaat</label>
+                  <label
+                     htmlFor="my-modal"
+                     className="btn btn-primary btn-sm w-full"
+                     onClick={() => {
+                        void handleSubmit(onSubmit)();
+                     }}
+                  >
+                     Verstuur resultaat
+                  </label>
                </div>
             </div>
          </div >
