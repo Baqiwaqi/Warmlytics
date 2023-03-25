@@ -206,7 +206,7 @@ export const insulationRouter = createTRPCRouter({
 
       const { email } = input;
 
-      return await mailjet
+      const request = mailjet
          .post("send", { 'version': 'v3.1' })
          .request({
             "Messages": [
@@ -244,17 +244,19 @@ export const insulationRouter = createTRPCRouter({
                   "CustomID": "AppGettingStartedTest",
                }
             ]
-         }).then((result) => {
-            console.log(result.body)
-            return result.body;
-         }).catch((err) => {
-            console.log(err);
+         })
 
-            console.log(err.statusCode)
-            throw new TRPCError({
-               message: err.message as string,
-               code: "INTERNAL_SERVER_ERROR"
-            })
-         });
+      return request.then((result) => {
+         console.log(result.body)
+         return result.body;
+      }).catch((err) => {
+         console.log(err);
+
+         console.log(err.statusCode)
+         throw new TRPCError({
+            message: err.message as string,
+            code: "INTERNAL_SERVER_ERROR"
+         })
+      });
    }),
 });
