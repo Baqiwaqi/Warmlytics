@@ -1,5 +1,4 @@
 import { RxDashboard, } from "react-icons/rx";
-import { MdOutlineSettings } from "react-icons/md";
 
 interface LinksProps {
    icon: React.ReactNode;
@@ -14,11 +13,7 @@ const drawerLinks: LinksProps[] = [
       label: "Dashboard",
       href: "/",
    },
-   // {
-   //    icon: <MdOutlineSettings />,
-   //    label: "Settings",
-   //    href: "/settings",
-   // },
+
 ];
 
 export default drawerLinks;
