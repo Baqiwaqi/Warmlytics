@@ -251,7 +251,6 @@ export const insulationRouter = createTRPCRouter({
          return result.body;
       }).catch((err) => {
          console.log(err);
-
          console.log(err.statusCode)
          throw new TRPCError({
             message: err.message as string,
