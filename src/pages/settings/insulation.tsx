@@ -3,11 +3,11 @@
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
 import { Dialog, Transition } from "@headlessui/react";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { CurrentInsulation } from "@prisma/client";
+import { type BetterInsulation, CurrentInsulation } from "@prisma/client";
 import { createServerSupabaseClient } from "@supabase/auth-helpers-nextjs";
 import NextLink from "next/link";
 import { type GetServerSideProps, type NextPage } from "next/types";
-import { Fragment } from "react";
+import { Fragment, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { IoIosArrowBack } from "react-icons/io";
 import { RxDotsVertical } from "react-icons/rx";
@@ -92,7 +92,7 @@ const CurrentInsulation = () => {
    return (
       <div className="flex flex-col">
          {/* <span className="text-[#8A8BB3]">Huidige Isolatie</span> */}
-         <CurrentInsulationForm isEdit={false} refetch={() => { return null }} />
+         <CurrentInsulationForm isEdit={false} refetch={() => null} />
          <table className="table table-compact w-full mt-4">
             <thead>
                <tr>
@@ -116,7 +116,7 @@ const CurrentInsulation = () => {
                               </label>
                               <ul tabIndex={0} className="dropdown-content menu p-2 shadow bg-base-100 rounded-box w-52">
                                  <CurrentInsulationForm isEdit={true} currentInsulation={material} refetch={refetch} />
-                                 <DeleteDialog title="Delete" message="Are you sure you want to delete this current insulation?" onDelete={() => void onDelete(material?.id as string)} />
+                                 <DeleteDialog title="Delete" message="Are you sure you want to delete this current insulation?" onDelete={() => void onDelete(material?.id)} />
                               </ul>
                            </div>
                         </td>
@@ -292,10 +292,263 @@ const CurrentInsulationForm: React.FC<ICurrentInsulationForm> = ({ isEdit, curre
 };
 
 const ImpoveInsulation = () => {
+   const { data: betterInsulation, refetch } = api.insulation.getAllBetterInsulation.useQuery();
+
+   const deleteBetterInsulation = api.insulation.deleteBetterInsulation.useMutation();
+
+   const onDelete = async (id: string) => {
+      await deleteBetterInsulation.mutateAsync({ id: id }).then(() => {
+         void refetch();
+         toast.success('Better Insulation Deleted Successfully');
+      }).catch((err) => {
+         toast.error(err.message as string);
+      })
+   }
+
 
    return (
-      <div className="flex">
-         <span className="text-[#8A8BB3]">Verbeter Isolatie</span>
+      <div className="flex flex-col">
+         <BetterInsulationForm isEdit={false} refetch={() => null} />
+         <table className="table table-compact w-full mt-4">
+            <thead>
+               <tr>
+                  <th>Code</th>
+                  <th>Description</th>
+                  <th>RC</th>
+                  <th>IPV</th>
+                  <th>Start Price</th>
+                  <th>Square Price</th>
+                  <th>Actions</th>
+               </tr>
+            </thead>
+            <tbody>
+               {Number(betterInsulation?.length) > 0 ? betterInsulation?.map((item) => (
+                  <tr key={item.id}>
+                     <td>{item.code}</td>
+                     <td>{item.description}</td>
+                     <td>{item.rc}</td>
+                     <td>{item.ipv}</td>
+                     <td>{item.startPrice}</td>
+                     <td>{item.squarePrice}</td>
+                     <td>
+                        <div className="dropdown dropdown-bottom dropdown-end">
+                           <label tabIndex={0} className="btn btn-sm btn-ghost m-1">
+                              <RxDotsVertical />
+                           </label>
+                           <ul tabIndex={0} className="dropdown-content menu p-2 shadow bg-base-100 rounded-box w-52">
+                              <BetterInsulationForm isEdit={true} currentInsulation={item} refetch={refetch} />
+                              <li><a onClick={() => void onDelete(item.id)}>Delete</a></li>
+                           </ul>
+                        </div>
+                     </td>
+                  </tr>
+               )) : (
+                  <tr><td colSpan={7}>No Data Found</td></tr>
+               )}
+            </tbody>
+         </table>
       </div>
    )
 }
+
+interface IBetterInsulationForm {
+   isEdit: boolean;
+   currentInsulation?: BetterInsulation;
+   refetch: () => unknown;
+}
+
+const BetterInsulationFormSchema = z.object({
+   code: z.string().nonempty(),
+   description: z.string().nonempty(),
+   rc: z.any().transform((value) => Number(value)).nullable(),
+   ipv: z.number(),
+   startPrice: z.any().transform((value) => Number(value)).optional(),
+   squarePrice: z.any().transform((value) => Number(value)).optional(),
+});
+
+const BetterInsulationForm: React.FC<IBetterInsulationForm> = ({ isEdit, currentInsulation, refetch }) => {
+   const { isOpen, openDialog, closeDialog } = useDialog();
+
+   const { register, setValue, watch, handleSubmit, reset, formState: { errors } } = useForm<BetterInsulation>({
+      resolver: zodResolver(BetterInsulationFormSchema),
+      defaultValues: {
+         code: currentInsulation?.code,
+         description: currentInsulation?.description,
+         rc: currentInsulation?.rc,
+         ipv: Number(currentInsulation?.ipv),
+         startPrice: currentInsulation?.startPrice,
+         squarePrice: currentInsulation?.squarePrice,
+      }
+   });
+
+   useEffect(() => {
+      setValue('ipv', Number(currentInsulation?.ipv));
+   }, [currentInsulation?.ipv, setValue])
+
+   const createBetterInsulation = api.insulation.createBetterInsulation.useMutation();
+   const updateBetterInsulation = api.insulation.updateBetterInsulation.useMutation();
+
+   const onCreate = async (data: BetterInsulation) => {
+      console.log(data);
+      await createBetterInsulation.mutateAsync({
+         code: data.code,
+         description: data.description,
+         rc: Number(data.rc),
+         ipv: Number(data.ipv),
+         startPrice: Number(data.startPrice),
+         squarePrice: Number(data.squarePrice),
+      }).then(() => {
+         closeDialog();
+         reset();
+         refetch();
+         toast.success('Better Insulation Created Successfully');
+      }).catch((err) => {
+         toast.error(err.message as string);
+      })
+   }
+
+   const onUpdate = async (data: BetterInsulation) => {
+      await updateBetterInsulation.mutateAsync({
+         id: currentInsulation?.id as string,
+         code: data.code,
+         description: data.description,
+         rc: Number(data.rc),
+         ipv: Number(data.ipv),
+         startPrice: Number(data.startPrice),
+         squarePrice: Number(data.squarePrice),
+      }).then(() => {
+         closeDialog();
+         reset();
+         refetch();
+         toast.success('Better Insulation Updated Successfully');
+      }).catch((err) => {
+         toast.error(err.message as string);
+      })
+   }
+
+   return (
+      <>
+         {isEdit ? (
+            <li><a onClick={openDialog}>Bewerk</a></li>
+         ) : (
+            <button className="btn btn-accent btn-sm max-w-fit" onClick={openDialog}>Isolatie toevoegen</button>
+         )}
+         <Transition show={isOpen} as={Fragment}>
+            <Dialog as="div" className="relative z-10" onClose={closeDialog}>
+               <Transition.Child
+                  as={Fragment}
+                  enter="ease-out duration-300"
+                  enterFrom="opacity-0"
+                  enterTo="opacity-100"
+                  leave="ease-in duration-200"
+                  leaveFrom="opacity-100"
+                  leaveTo="opacity-0"
+               >
+                  <div className="fixed inset-0 bg-black bg-opacity-25" />
+               </Transition.Child>
+
+               <div className="fixed inset-0 overflow-y-auto">
+                  <div className="flex min-h-full items-center justify-center p-4 text-center">
+                     <Transition.Child
+                        as={Fragment}
+                        enter="ease-out duration-300"
+                        enterFrom="opacity-0 scale-95"
+                        enterTo="opacity-100 scale-100"
+                        leave="ease-in duration-200"
+                        leaveFrom="opacity-100 scale-100"
+                        leaveTo="opacity-0 scale-95"
+                     >
+                        <Dialog.Panel className="w-full max-w-xl transform overflow-hidden rounded-2xl bg-white p-6 text-left align-middle shadow-xl transition-all">
+                           <div className="flex justify-between">
+                              <Dialog.Title
+                                 as="h3"
+                                 className="text-lg font-medium leading-6 text-gray-900 py-2"
+                              >
+                                 {isEdit ? 'Bewerk Isolatie' : 'Isolatie toevoegen'}
+                              </Dialog.Title>
+                              <button
+                                 className="text-gray-500 rounded focus:outline-none focus:shadow-outline hover:text-gray-700"
+                                 type="button"
+                                 onClick={closeDialog}>
+                                 <span >Close</span>
+                              </button>
+                           </div>
+                           <CustomFormControl label="Code" error={errors.code}>
+                              <input
+                                 type="text"
+                                 className={`input input-md input-bordered w-full${errors.code ? 'input-error' : ''}`}
+                                 {...register('code')}
+                              />
+                           </CustomFormControl>
+                           <CustomFormControl label="Description" error={errors.description}>
+                              <input
+                                 type="text"
+                                 className={`input input-md input-bordered w-full${errors.description ? 'input-error' : ''}`}
+                                 {...register('description')}
+                              />
+                           </CustomFormControl>
+                           <CustomFormControl label="RC" error={errors.rc}>
+                              <input
+                                 className={`input input-md input-bordered w-full${errors.rc ? 'input-error' : ''}`}
+                                 {...register('rc', {
+                                    required: true,
+                                    pattern: {
+                                       value: /^\d+(\.\d{1,2})?$/,
+                                       message: 'Invalid number format'
+                                    }
+                                 })}
+                              />
+                           </CustomFormControl>
+                           <CustomFormControl label="IPV" error={errors.ipv}>
+                              <input
+                                 type="checkbox"
+                                 checked={watch('ipv') !== 0}
+                                 className="checkbox"
+                                 onChange={(e) => {
+                                    setValue('ipv', e.target.checked ? 1 : 0)
+                                 }}
+                              />
+                           </CustomFormControl>
+                           <CustomFormControl label="Start Price" error={errors.startPrice}>
+                              <input
+                                 className={`input input-md input-bordered w-full${errors.startPrice ? 'input-error' : ''}`}
+                                 {...register('startPrice', {
+                                    required: true,
+                                    pattern: {
+                                       value: /^\d+(\.\d{1,2})?$/,
+                                       message: 'Invalid number format'
+                                    }
+                                 })}
+                              />
+                           </CustomFormControl>
+                           <CustomFormControl label="Square Price" error={errors.squarePrice}>
+                              <input
+                                 className={`input input-md input-bordered w-full${errors.squarePrice ? 'input-error' : ''}`}
+                                 {...register('squarePrice', {
+                                    required: true,
+                                    pattern: {
+                                       value: /^\d+(\.\d{1,2})?$/,
+                                       message: 'Invalid number format'
+                                    }
+                                 })}
+                              />
+                           </CustomFormControl>
+                           <div className="flex justify-end mt-4">
+                              <button
+                                 className="btn btn-primary"
+                                 type="submit"
+                                 onClick={() => isEdit ? void handleSubmit(onUpdate)() : void handleSubmit(onCreate)()}
+                              >
+                                 {isEdit ? 'Update' : 'Create'}
+                              </button>
+                           </div>
+                        </Dialog.Panel>
+                     </Transition.Child>
+                  </div>
+               </div>
+            </Dialog>
+         </Transition>
+      </>
+   );
+}
+
