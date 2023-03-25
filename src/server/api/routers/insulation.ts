@@ -201,6 +201,7 @@ export const insulationRouter = createTRPCRouter({
          paybackPeriod: z.number(),
       })
    ).mutation(async ({ input }) => {
+      console.log("sendResultsToEmail");
 
       const mailjet = Mailjet.apiConnect(`${env.MJ_API_KEY}`, `${env.MJ_API_SECRET}`);
 
