@@ -1,18 +1,18 @@
 /* eslint-disable @typescript-eslint/no-unsafe-call */
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
-import { type GetServerSideProps, type NextPage } from "next";
+import { type BetterInsulation, type CurrentInsulation } from "@prisma/client";
+import { createServerSupabaseClient } from "@supabase/auth-helpers-nextjs";
+import { type GetServerSideProps } from "next";
 import Head from "next/head";
-// import { CurrentInsulationArray, NewInsulationArray } from "~/utils/helpers";
+import NextLink from "next/link";
+import { useForm } from "react-hook-form";
 import { IoClose } from "react-icons/io5";
 import { SlSettings } from "react-icons/sl";
-import Layout from "~/components/layout/main";
-import { createServerSupabaseClient } from "@supabase/auth-helpers-nextjs";
-import CustomFormControl from "~/components/common/form-control";
-import { useForm } from "react-hook-form";
-import NextLink from "next/link";
-import { api } from "~/utils/api";
-import { useEffect } from "react";
 import { toast } from "react-toastify";
+import CustomFormControl from "~/components/common/form-control";
+import Layout from "~/components/layout/main";
+import { prisma } from "~/server/db";
+import { api } from "~/utils/api";
 
 type InsulationProps = {
    project: string;
@@ -36,10 +36,12 @@ type InsulationProps = {
    email: string;
 };
 
-const Home: NextPage = () => {
-   //Fetch data for materials
-   const { data: currentInsulation, isLoading: currentLoading, isFetched } = api.insulation.getAllCurrentInsulation.useQuery();
-   const { data: newInsulation, isLoading: betterLoading } = api.insulation.getAllBetterInsulation.useQuery();
+interface HomeProps {
+   allCurrent: CurrentInsulation[];
+   allBetter: BetterInsulation[];
+}
+
+const Home: React.FC<HomeProps> = ({ allCurrent, allBetter }) => {
 
    const sendEmail = api.insulation.sendResultsToEmail.useMutation();
 
@@ -50,15 +52,17 @@ const Home: NextPage = () => {
          squeareGasUsage: 7.5,
          surfaceArea: 10,
          stpr: 1,
-         matCode: "",
-         matDescription: "",
-         currentRC: currentInsulation?.[0]?.rc || 0,
+         //current
+         matCode: allCurrent?.[0]?.id || "",
+         matDescription: allCurrent?.[0]?.description || "",
+         currentRC: allCurrent?.[0]?.rc || 0,
+         //better
+         newMatCode: allBetter?.[0]?.id || "",
+         newMatDescription: allBetter?.[0]?.description || "",
+         rVerb: allBetter?.[0]?.rc,
+         newMaterialCost: allBetter?.[0]?.squarePrice || 0,
          gasYearlyCost: 0,
-         newMatCode: "",
-         newMatDescription: "",
-         rVerb: newInsulation?.[0]?.rc,
          gasYearImprovement: 0,
-         newMaterialCost: newInsulation?.[0]?.squarePrice || 0,
          gasSaving: 0,
          resultSavings: 0,
          calculatedCost: 0,
@@ -67,31 +71,13 @@ const Home: NextPage = () => {
       },
    });
 
-   useEffect(() => {
-      if (!isFetched) return;
-      setValue("currentRC", currentInsulation?.[0]?.rc || 0);
-      setValue("matDescription", currentInsulation?.[0]?.description || "");
-      setValue("newMatDescription", newInsulation?.[0]?.description || "");
-      setValue("rVerb", newInsulation?.[0]?.rc || 0);
-      setValue("newMaterialCost", newInsulation?.[0]?.squarePrice || 0);
-   }, [currentInsulation, isFetched, newInsulation, setValue]);
-
-   if (currentLoading || betterLoading) {
-      return (
-         <Layout>
-            <div className="flex flex-col items-center justify-center h-screen">
-               <span className="text-2xl font-semibold">Loading...</span>
-            </div>
-         </Layout>
-      )
-   }
 
    const gasYearlyCost = (watch("squeareGasUsage") * watch("surfaceArea") / watch("currentRC") * watch("stpr"))
    const gasYearImprovement = (watch("squeareGasUsage") * watch("surfaceArea") / watch("rVerb") * watch("stpr"))
 
    const handleMatCodeChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-      const mappedRc = currentInsulation?.find((item) => item.id === e.target.value)?.rc;
-      const materialDescription = currentInsulation?.find((item) => item.id === e.target.value)?.description;
+      const mappedRc = allCurrent?.find((item) => item.id === e.target.value)?.rc;
+      const materialDescription = allCurrent?.find((item) => item.id === e.target.value)?.description;
       const cost = watch("squeareGasUsage") * watch("surfaceArea") / (mappedRc || 0) * watch("stpr")
 
       setValue("matCode", e.target.value);
@@ -102,10 +88,10 @@ const Home: NextPage = () => {
 
    const handleNewMatCodeChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
       setValue("newMatCode", e.target.value);
-      const item = newInsulation?.find((item) => item.id === e.target.value);
+      const item = allBetter?.find((item) => item.id === e.target.value);
       const rVerb = Number(item?.rc) + (watch("currentRC") * Number(item?.ipv))
-      const nMaterialDescription = newInsulation?.find((item) => item.id === e.target.value)?.description;
-      const nMaterialCost = newInsulation?.find((item) => item.id === e.target.value)?.squarePrice;
+      const nMaterialDescription = allBetter?.find((item) => item.id === e.target.value)?.description;
+      const nMaterialCost = allBetter?.find((item) => item.id === e.target.value)?.squarePrice;
       const cost = watch("squeareGasUsage") * watch("surfaceArea") / (rVerb || 0) * watch("stpr")
 
       setValue("newMatCode", e.target.value);
@@ -219,7 +205,7 @@ const Home: NextPage = () => {
 
                      }}
                      className="select select-bordered select-sm w-full max-w-xs">
-                     {currentInsulation?.map((item) => (
+                     {allCurrent?.map((item) => (
                         <option
                            key={item.id}
                            value={item.id}
@@ -258,7 +244,7 @@ const Home: NextPage = () => {
                      value={watch("newMatCode")}
                      onChange={(e) => handleNewMatCodeChange(e)}
                      className="select select-bordered select-sm w-full max-w-xs">
-                     {newInsulation?.map((item) => (
+                     {allBetter?.map((item) => (
                         <option key={item.id} value={item.id} onClick={() => {
                            setValue("newMatCode", item.id);
                            const rVerb = item.rc + (watch("currentRC") * item.ipv);
@@ -362,9 +348,31 @@ export const getServerSideProps: GetServerSideProps = async (ctx) => {
          },
       }
    }
+   const allCurrentInsulation = await prisma.currentInsulation.findMany({
+      select: {
+         id: true,
+         code: true,
+         description: true,
+         rc: true,
+      }
+   });
+   const allBetterInsulation = await prisma.betterInsulation.findMany({
+      select: {
+         id: true,
+         code: true,
+         description: true,
+         rc: true,
+         ipv: true,
+         squarePrice: true,
+         startPrice: true,
+      }
+   });
 
    return {
-      props: {},
+      props: {
+         allCurrent: allCurrentInsulation,
+         allBetter: allBetterInsulation,
+      },
    }
 }
 
