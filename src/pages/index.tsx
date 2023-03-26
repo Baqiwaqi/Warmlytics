@@ -189,6 +189,7 @@ const Home: React.FC<HomeProps> = ({ allCurrent, allBetter }) => {
                   <CustomFormControl label="Stookprofiel" tooltip="Stookprofiel, hiermee geef je een profiel van het stookgedrag. Ik gebruik het hier vooral om aan tegen dat op de bovenverdiepingen niet of weinig wordt gestookt waardoor de temperatuur daar lager zal zijn en het warmteverlies dan ook lager is." >
                      <input
                         type="number"
+                        step={0.1}
                         {...register("stpr")}
                         className="input input-bordered input-sm w-full max-w-xs"
                      />
