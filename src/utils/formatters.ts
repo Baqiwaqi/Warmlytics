@@ -1,4 +1,4 @@
-export const numberFormatter2 = new Intl.NumberFormat('nl-NL', {
-   minimumFractionDigits: 2,
-   maximumFractionDigits: 2,
-});
+//create a function formatter for an nummber and 2 deciamls
+export const twoDecimals = (num: number) => {
+   return num.toFixed(2);
+}

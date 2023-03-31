@@ -316,7 +316,7 @@ const ImpoveInsulation = () => {
                   {/* gidden when snmall */}
                   <th className="hidden md:table-cell">Omschrijving</th>
                   <th>RC</th>
-                  <th>IPV</th>
+                  <th>Bij</th>
                   <th>Start Prijs</th>
                   <th>Prijs m2</th>
                   <th></th>
@@ -376,14 +376,18 @@ const BetterInsulationForm: React.FC<IBetterInsulationForm> = ({ isEdit, current
          code: currentInsulation?.code,
          description: currentInsulation?.description,
          rc: currentInsulation?.rc,
-         ipv: Number(currentInsulation?.ipv) ?? 0,
+         ipv: currentInsulation?.ipv ?? 0,
          startPrice: currentInsulation?.startPrice,
          squarePrice: currentInsulation?.squarePrice,
       }
    });
 
    useEffect(() => {
-      setValue('ipv', Number(currentInsulation?.ipv));
+      if (currentInsulation?.ipv === 0) {
+         setValue('ipv', 0);
+      } else {
+         setValue('ipv', 1);
+      }
    }, [currentInsulation?.ipv, setValue])
 
    const createBetterInsulation = api.insulation.createBetterInsulation.useMutation();
@@ -500,7 +504,7 @@ const BetterInsulationForm: React.FC<IBetterInsulationForm> = ({ isEdit, current
                                  })}
                               />
                            </CustomFormControl>
-                           <CustomFormControl label="IPV" error={errors.ipv}>
+                           <CustomFormControl label="Bij" error={errors.ipv}>
                               <input
                                  type="checkbox"
                                  checked={watch('ipv') !== 0}

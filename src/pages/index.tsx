@@ -29,6 +29,7 @@ type InsulationProps = {
    rVerb: number;
    gasYearImprovement: number;
    newMaterialCost: number;
+   newMaterialStart: number;
    gasSaving: number;
    resultSavings: number;
    calculatedCost: number;
@@ -57,9 +58,11 @@ const Home: React.FC<HomeProps> = ({ allCurrent, allBetter }) => {
          matDescription: allCurrent?.[0]?.description || "",
          currentRC: allCurrent?.[0]?.rc || 0,
          //better
+
          newMatCode: allBetter?.[0]?.id || "",
          newMatDescription: allBetter?.[0]?.description || "",
          rVerb: allBetter?.[0]?.rc,
+         newMaterialStart: allBetter?.[0]?.startPrice || 0,
          newMaterialCost: allBetter?.[0]?.squarePrice || 0,
          gasYearlyCost: 0,
          gasYearImprovement: 0,
@@ -72,8 +75,8 @@ const Home: React.FC<HomeProps> = ({ allCurrent, allBetter }) => {
    });
 
 
-   const gasYearlyCost = (watch("squeareGasUsage") * watch("surfaceArea") / watch("currentRC") * watch("stpr"))
-   const gasYearImprovement = (watch("squeareGasUsage") * watch("surfaceArea") / watch("rVerb") * watch("stpr"))
+   const gasYearlyCost: number = (watch("squeareGasUsage") * watch("surfaceArea") / watch("currentRC") * watch("stpr"))
+   const gasYearImprovement: number = (watch("squeareGasUsage") * watch("surfaceArea") / watch("rVerb") * watch("stpr"))
 
    const handleMatCodeChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
       const mappedRc = allCurrent?.find((item) => item.id === e.target.value)?.rc;
@@ -96,6 +99,7 @@ const Home: React.FC<HomeProps> = ({ allCurrent, allBetter }) => {
 
       setValue("newMatCode", e.target.value);
       setValue("newMatDescription", nMaterialDescription || "");
+      setValue("newMaterialStart", item?.startPrice || 0);
       setValue("rVerb", rVerb || 0);
       setValue("newMaterialCost", nMaterialCost || 0);
       setValue("gasYearImprovement", cost);
@@ -104,7 +108,7 @@ const Home: React.FC<HomeProps> = ({ allCurrent, allBetter }) => {
    const calculateResults = () => {
       const gasSaving = (gasYearlyCost - gasYearImprovement)
       const resultSavings = (gasSaving * watch("gasPrice"))
-      const calculatedCost = (watch("newMaterialCost") * watch("surfaceArea"))
+      const calculatedCost = watch("newMaterialStart") + (watch("newMaterialCost") * watch("surfaceArea"))
       const tvt = (calculatedCost / resultSavings)
 
       setValue("gasSaving", gasSaving);
@@ -117,6 +121,8 @@ const Home: React.FC<HomeProps> = ({ allCurrent, allBetter }) => {
       await sendEmail.mutateAsync({
          email: data.email,
          projectName: data.project,
+         surfaceArea: data.surfaceArea,
+         stookProfiel: data.stpr,
          currentMaterial: data.matDescription,
          betterMaterial: data.newMatDescription,
          savingsGas: data.gasSaving,
@@ -223,14 +229,14 @@ const Home: React.FC<HomeProps> = ({ allCurrent, allBetter }) => {
                <div className="flex space-x-4 pt-2">
                   <CustomFormControl label="RC waarde">
                      <input
-                        value={watch("currentRC")?.toFixed(2)}
+                        value={twoDecimals(watch("currentRC"))}
                         className="input-sm w-full max-w-xs px-1 disabled:bg-white disabled:font-bold"
                         disabled
                      />
                   </CustomFormControl>
                   <CustomFormControl label="Gas / Jaar" tooltip="Gasvebruik in m3 per jaar">
                      <input
-                        value={gasYearlyCost.toFixed(2)}
+                        value={twoDecimals(gasYearlyCost)}
                         className="input-sm w-full max-w-xs px-1 disabled:bg-white disabled:font-bold"
                         disabled
                      />
@@ -259,7 +265,7 @@ const Home: React.FC<HomeProps> = ({ allCurrent, allBetter }) => {
                <div className="flex space-x-4 mt-4">
                   <CustomFormControl label="RC waarde" tooltip="R-waarde nadat de isolatie verbeterd is.">
                      <input
-                        value={watch("rVerb")?.toFixed(2)}
+                        value={twoDecimals(watch("rVerb"))}
                         className="input-sm w-full max-w-xs px-1 disabled:bg-white disabled:font-bold"
                         disabled
                      />
@@ -267,14 +273,14 @@ const Home: React.FC<HomeProps> = ({ allCurrent, allBetter }) => {
 
                   <CustomFormControl label="Gas / Jaar" tooltip="Warmteverlies in m3 per jaar na verbeteringen.">
                      <input
-                        value={gasYearImprovement.toFixed(2)}
+                        value={twoDecimals(gasYearImprovement)}
                         className="input-sm w-full max-w-xs px-1 disabled:bg-white disabled:font-bold"
                         disabled
                      />
                   </CustomFormControl>
                </div>
                <label onClick={calculateResults} htmlFor="my-modal" className="btn btn-primary btn-sm mt-4">
-                  Resultaat Bereken
+                  Resultaat Berekenen
                </label>
             </div>
          </main>
@@ -290,16 +296,20 @@ const Home: React.FC<HomeProps> = ({ allCurrent, allBetter }) => {
                </div>
                <div className="flex justify-between mt-6">
                   <div className="flex flex-col space-y-2">
+                     <span className="text-sm">Oppervlakte</span>
+                     <span className="text-sm">Stookprofiel</span>
                      <span className="text-sm">Besparing gas</span>
                      <span className="text-sm">Besparing</span>
                      <span className="text-sm">Kosten</span>
                      <span className="text-sm">TVT</span>
                   </div>
                   <div className="flex flex-col space-y-2">
-                     <span className="text-sm">{watch("gasSaving").toFixed(2)} m3</span>
-                     <span className="text-sm">{watch("resultSavings").toFixed(2)},- per jaar</span>
+                     <span className="text-sm">{watch("surfaceArea")} m2</span>
+                     <span className="text-sm">{watch("stpr")}</span>
+                     <span className="text-sm">{twoDecimals(watch("gasSaving"))} m3</span>
+                     <span className="text-sm">{twoDecimals(watch("resultSavings"))},- per jaar</span>
                      <span className="text-sm">{watch("calculatedCost")},- eenmalig</span>
-                     <span className="text-sm">{watch("tvt").toFixed(2)} jaar</span>
+                     <span className="text-sm">{twoDecimals(watch("tvt"))} jaar</span>
                   </div>
                </div>
                <div className="form-control w-full pt-6">
@@ -371,9 +381,14 @@ export const getServerSideProps: GetServerSideProps = async (ctx) => {
 
    return {
       props: {
-         allCurrent: allCurrentInsulation,
-         allBetter: allBetterInsulation,
+         allCurrent: allCurrentInsulation.sort((a, b) => a.code.localeCompare(b.code)),
+         allBetter: allBetterInsulation.sort((a, b) => a.code.localeCompare(b.code)),
       },
    }
 }
 
+
+//create a function formatter for an nummber and 2 deciamls
+const twoDecimals = (num: number) => {
+   return num.toFixed(2);
+}

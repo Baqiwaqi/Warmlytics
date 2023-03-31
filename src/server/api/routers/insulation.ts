@@ -87,7 +87,7 @@ export const insulationRouter = createTRPCRouter({
    }),
    getAllCurrentInsulation: protectedProcedure.query(async ({ ctx }) => {
       return await ctx.prisma.currentInsulation.findMany().then((currentInsulation: CurrentInsulation[]) => {
-         return currentInsulation;
+         return currentInsulation.sort((a, b) => a.code.localeCompare(b.code));
       }).catch((error: Error) => {
          throw new TRPCError({
             message: error.message,
@@ -151,7 +151,7 @@ export const insulationRouter = createTRPCRouter({
             squarePrice: squarePrice,
          }
       }).then((betterInsulation: BetterInsulation) => {
-         return betterInsulation;
+         return betterInsulation
       }).catch((error: Error) => {
          throw new TRPCError({
             message: error.message,
@@ -181,7 +181,7 @@ export const insulationRouter = createTRPCRouter({
    }),
    getAllBetterInsulation: protectedProcedure.query(async ({ ctx }) => {
       return await ctx.prisma.betterInsulation.findMany().then((betterInsulation: BetterInsulation[]) => {
-         return betterInsulation;
+         return betterInsulation.sort((a, b) => a.code.localeCompare(b.code));
       }).catch((error: Error) => {
          throw new TRPCError({
             message: error.message,
@@ -193,6 +193,8 @@ export const insulationRouter = createTRPCRouter({
       z.object({
          email: z.string().email(),
          projectName: z.string(),
+         surfaceArea: z.number(),
+         stookProfiel: z.number(),
          currentMaterial: z.string(),
          betterMaterial: z.string(),
          savingsGas: z.number(),
@@ -226,6 +228,10 @@ export const insulationRouter = createTRPCRouter({
                   "HTMLPart": `<h3> Beste ${email}, </h3>
                      <br/> Uw resultaten zijn berekend. <br /> <br />
                      <strong> Projectnaam: </strong> ${input.projectName}
+                     <br />
+                     <strong>Oppervlakte: </strong> ${input.surfaceArea} m2
+                     <br />
+                     <strong>Stookprofiel: </strong> ${input.stookProfiel}
                      <br />
                      <strong>Huidige isolatie materiaal: </strong> ${input.currentMaterial}
                      <br />
