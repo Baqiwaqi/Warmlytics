@@ -335,8 +335,8 @@ const Home: React.FC<HomeProps> = ({ allCurrent, allBetter }) => {
                   </label>
                </div>
             </div>
-         </div >
-      </Layout >
+         </div>
+      </Layout>
    );
 };
 

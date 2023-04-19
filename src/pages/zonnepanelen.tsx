@@ -1,9 +1,11 @@
 import { createServerSupabaseClient } from '@supabase/auth-helpers-nextjs'
+import { log } from 'console';
 import { type GetServerSideProps } from 'next'
 import { useForm } from 'react-hook-form';
 import { IoClose } from 'react-icons/io5';
 import CustomFormControl from '~/components/common/form-control';
 import Layout from '~/components/layout/main'
+import { numberFormatter } from '~/utils/formatters';
 
 type SunPanelsPageProps = {
    amountOfPanels: number;
@@ -36,22 +38,26 @@ const SunPanelsPage = () => {
    const { register, watch, setValue, handleSubmit } = useForm<SunPanelsPageProps>({
       defaultValues: {
          amountOfPanels: 6,
-         peakPower: 400,
+         peakPower: 300,
          yieldFactor: 75,
          correctionFactor: 90,
          installationDate: new Date(),
          thisYearGroup: 72,
+
          electricityConsumption: 2500,
          directElcectricityPercentage: 30,
+
          investment: 4200,
          priceKWH: 0.40,
          feedRate: 0.12,
          inflationRate: 2,
+
          //calculation
          totalPeakPower: 0,
          totalYield: 0,
          selfConsumption: 0,
          feedIn: 0,
+
          lessEnergieCosts: 0,
          firstYearProfit: 0,
          nettoYieldAfter25: 0,
@@ -61,10 +67,111 @@ const SunPanelsPage = () => {
       },
    });
 
+
+
+   type YieldTable = {
+      year: number;
+      factor: number;
+      inflationRate?: number;
+      yield?: number;
+      profit?: number;
+   }
+
    const totalPeakPower = (watch("amountOfPanels") * watch("peakPower"));
    const totalYield = (totalPeakPower * watch("yieldFactor") * watch("correctionFactor") / 10000);
    const selfConsumption = (totalYield * watch("directElcectricityPercentage") / 100);
    const feedIn = (totalYield - selfConsumption);
+
+   console.log("feedIn", feedIn)
+   const renderYieldTable = () => {
+
+
+      const yieldTable: YieldTable[] = [
+         { year: 1, factor: 100, inflationRate: 1, yield: 1, profit: 1 },
+         { year: 2, factor: 100, inflationRate: 1, yield: 1, profit: 1 },
+         { year: 3, factor: 64, inflationRate: 1, yield: 1, profit: 1 },
+         { year: 4, factor: 64, inflationRate: 1, yield: 1, profit: 1 },
+         { year: 5, factor: 55, inflationRate: 1, yield: 1, profit: 1 },
+         { year: 6, factor: 45, inflationRate: 1, yield: 1, profit: 1 },
+         { year: 7, factor: 37, inflationRate: 1, yield: 1, profit: 1 },
+         { year: 8, factor: 28, inflationRate: 1, yield: 1, profit: 1 },
+         { year: 9, factor: 0, inflationRate: 1, yield: 1, profit: 1 },
+         { year: 10, factor: 0, inflationRate: 1, yield: 1, profit: 1 },
+         { year: 11, factor: 0, inflationRate: 1, yield: 1, profit: 1 },
+         { year: 12, factor: 0, inflationRate: 1, yield: 1, profit: 1 },
+         { year: 13, factor: 0, inflationRate: 1, yield: 1, profit: 1 },
+         { year: 14, factor: 0, inflationRate: 1, yield: 1, profit: 1 },
+         { year: 15, factor: 0, inflationRate: 1, yield: 1, profit: 1 },
+         { year: 16, factor: 0, inflationRate: 1, yield: 1, profit: 1 },
+         { year: 17, factor: 0, inflationRate: 1, yield: 1, profit: 1 },
+         { year: 18, factor: 0, inflationRate: 1, yield: 1, profit: 1 },
+         { year: 19, factor: 0, inflationRate: 1, yield: 1, profit: 1 },
+         { year: 20, factor: 0, inflationRate: 1, yield: 1, profit: 1 },
+         { year: 21, factor: 0, inflationRate: 1, yield: 1, profit: 1 },
+         { year: 22, factor: 0, inflationRate: 1, yield: 1, profit: 1 },
+         { year: 23, factor: 0, inflationRate: 1, yield: 1, profit: 1 },
+         { year: 24, factor: 0, inflationRate: 1, yield: 1, profit: 1 },
+         { year: 25, factor: 0, inflationRate: 1, yield: 1, profit: 1 },
+      ];
+
+      const investment = watch("investment");
+      let profit;
+
+      yieldTable.forEach((item, index) => {
+         //  (geleidelijk gaat het rendement in 25 jaar van 100% naar 80%).
+         console.log("------", index, "------")
+         // Calculate inflation rate
+         if (index === 0) {
+            item.inflationRate = 1;
+         } else {
+            item.inflationRate = Number(yieldTable[index - 1]?.inflationRate) * (1 + watch("inflationRate") / 100);
+         }
+
+         // Calculate rendemenet goes 100 to 80 in 25 years
+         // const y = 20 / 25;
+         // const rendement = (100 - (y * (index))) / 100;
+         // console.log("rendement", rendement);
+
+         const factor = item.factor
+         const saldering = factor / 100;
+         console.log("saldering", saldering)
+
+         // console.log("rendement", rendement)
+         const feedInValue = feedIn * watch("priceKWH") * saldering;
+         console.log("feedInValue", feedInValue)
+
+         const selfConsumptionValue = selfConsumption * watch("priceKWH");
+         console.log("selfConsumptionValue", selfConsumptionValue)
+
+         const feedInSaldering = feedIn * watch("feedRate") * (1 - saldering);
+         console.log("feedInSaldering", feedInSaldering)
+
+         const sum = feedInValue + selfConsumptionValue + feedInSaldering;
+         console.log("sum", sum)
+
+         const percentage = watch("thisYearGroup") / 100;
+
+
+         if (index === 0) {
+
+            const yieldValue = sum * percentage * item.inflationRate;
+            console.log("yieldValue", yieldValue);
+            item.yield = yieldValue;
+            item.profit = yieldValue - investment;
+
+         } else {
+            const yieldValue = sum * item.inflationRate;
+            console.log("yieldValue", yieldValue);
+            item.yield = yieldValue;
+            item.profit = Number(yieldTable[index - 1]?.profit) + yieldValue;
+         }
+
+      });
+
+      return yieldTable;
+   };
+
+   const yieldTable = renderYieldTable();
 
 
    const onSubmit = (data: SunPanelsPageProps) => {
@@ -122,7 +229,7 @@ const SunPanelsPage = () => {
                   <CustomFormControl label="Fractie dit jaar">
                      <input className="input input-bordered input-sm w-full max-w-xs"
                         type="number"
-                        {...register("peakPower")}
+                        {...register("thisYearGroup")}
                      />
                   </CustomFormControl>
                </div>
@@ -207,6 +314,11 @@ const SunPanelsPage = () => {
                      <span className="text-sm">{totalYield}</span>
                      <span className="text-sm">{selfConsumption}</span>
                      <span className="text-sm">{feedIn}</span>
+                     <span className="text-sm">{numberFormatter(yieldTable[1]?.yield as number)}</span>
+                     <span className="text-sm">{yieldTable.find((item) => Number(item.profit) > 0)?.year}</span>
+                     <span className="text-sm">{numberFormatter(yieldTable[24]?.profit as number)}</span>
+                     <span className="text-sm">{numberFormatter(yieldTable[24]?.profit as number + watch("investment"))}</span>
+                     <span className="text-sm">{numberFormatter((Math.pow((yieldTable[24]?.profit as number + watch("investment")) / watch("investment"), 1 / 25) * 100) - 100)}%</span>
                   </div>
                </div>
                <div className="form-control w-full pt-6">
@@ -233,6 +345,9 @@ const SunPanelsPage = () => {
                </div>
             </div>
          </div>
+         <pre>
+            {JSON.stringify(yieldTable, null, 2)}
+         </pre>
       </Layout>
    )
 }
