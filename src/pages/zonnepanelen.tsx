@@ -122,7 +122,7 @@ const SunPanelsPage = () => {
 
          yieldTable.forEach((item, index) => {
             //  (geleidelijk gaat het rendement in 25 jaar van 100% naar 80%).
-            console.log("------", index, "------")
+            // console.log("------", index, "------")
             // Calculate inflation rate
             if (index === 0) {
                item.inflationRate = 1;
