@@ -146,8 +146,8 @@ const Home: React.FC<HomeProps> = ({ allCurrent, allBetter }) => {
          <main className="flex min-h-screen flex-col items-center justify-start bg-base-100">
             <div className="flex w-full content-end justify-end">
                <NextLink href="/settings/insulation">
-                  <button className="btn btn-ghost gap-2">
-                     <SlSettings className="text-2xl text-[#10275A]" />
+                  <button className="btn btn-ghost btn-sm">
+                     <SlSettings className="text-lg text-[#10275A]" />
                   </button>
                </NextLink>
             </div>
@@ -156,7 +156,7 @@ const Home: React.FC<HomeProps> = ({ allCurrent, allBetter }) => {
                   Isolatie Calculator
                </h1>
             </div>
-            <div className="container card bg-base-100 w-96 flex flex-col py-4 px-8">
+            <div className="container card bg-base-100 w-96 flex flex-col px-8">
                <div className="flex content-center justify-center space-x-4 pt-4">
                   <CustomFormControl label="Project" tooltip="Beschrijving van de woning">
                      <input
@@ -289,7 +289,7 @@ const Home: React.FC<HomeProps> = ({ allCurrent, allBetter }) => {
          <div className="modal">
             <div className="modal-box p-8 justify-center content-center">
                <div className="flex justify-between">
-                  <h3 className="font-bold text-lg text-[#10275A]">Berekeningen {watch("project")}</h3>
+                  <h3 className="font-bold text-lg text-[#10275A]">Berekeningen</h3>
                   <label htmlFor="my-modal" className="btn btn-ghost btn-sm">
                      <IoClose className="w-5 h-5" />
                   </label>
@@ -335,8 +335,8 @@ const Home: React.FC<HomeProps> = ({ allCurrent, allBetter }) => {
                   </label>
                </div>
             </div>
-         </div >
-      </Layout >
+         </div>
+      </Layout>
    );
 };
 

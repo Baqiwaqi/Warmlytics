@@ -2,7 +2,18 @@
 // GDO	Glas dubbel standaard	 0,33 
 // GHR+	Glas HR+	 0,60 
 // GH++	Glas HR++	 1,00 
+
+import moment from "moment";
+
 // SMO	Spouwmuur ongeisoleerd 	 0,40 
+export function calculateYearPercentage(selectedDate: Date) {
+   const lastDayOfYear = new Date(selectedDate.getFullYear(), 11, 31);
+   const daysInYear = 365;
+   const daysPast = moment(selectedDate).diff(moment(lastDayOfYear), "days") * -1;
+   const percentage = (daysPast / daysInYear) * 100;
+
+   return percentage;
+}
 
 export type CurrentInsulation = {
    id: number;

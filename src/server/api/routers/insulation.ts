@@ -1,6 +1,4 @@
-/* eslint-disable @typescript-eslint/no-unsafe-call */
-/* eslint-disable @typescript-eslint/no-unsafe-member-access */
-/* eslint-disable @typescript-eslint/no-unsafe-return */
+
 import { type BetterInsulation, type CurrentInsulation } from "@prisma/client";
 import { TRPCError } from "@trpc/server";
 import Mailjet from "node-mailjet";
@@ -257,9 +255,8 @@ export const insulationRouter = createTRPCRouter({
          return result.body;
       }).catch((err) => {
          console.log(err);
-         console.log(err.statusCode)
          throw new TRPCError({
-            message: err.message as string,
+            message: err as string,
             code: "INTERNAL_SERVER_ERROR"
          })
       });
