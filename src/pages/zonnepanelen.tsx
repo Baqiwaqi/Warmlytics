@@ -137,20 +137,20 @@ const SunPanelsPage = () => {
 
             const factor = item.factor
             const saldering = factor / 100;
-            console.log("saldering", saldering)
+            // console.log("saldering", saldering)
 
             // console.log("rendement", rendement)
             const feedInValue = feedIn * watch("priceKWH") * saldering;
-            console.log("feedInValue", feedInValue)
+            // console.log("feedInValue", feedInValue)
 
             const selfConsumptionValue = selfConsumption * watch("priceKWH");
-            console.log("selfConsumptionValue", selfConsumptionValue)
+            // console.log("selfConsumptionValue", selfConsumptionValue)
 
             const feedInSaldering = feedIn * watch("feedRate") * (1 - saldering);
-            console.log("feedInSaldering", feedInSaldering)
+            // console.log("feedInSaldering", feedInSaldering)
 
             const sum = feedInValue + selfConsumptionValue + feedInSaldering;
-            console.log("sum", sum)
+            // console.log("sum", sum)
 
             const percentage = watch("thisYearPercentage") / 100;
 
@@ -158,13 +158,13 @@ const SunPanelsPage = () => {
             if (index === 0) {
 
                const yieldValue = sum * percentage * item.inflationRate;
-               console.log("yieldValue", yieldValue);
+               // console.log("yieldValue", yieldValue);
                item.yield = yieldValue;
                item.profit = yieldValue - investment;
 
             } else {
                const yieldValue = sum * item.inflationRate;
-               console.log("yieldValue", yieldValue);
+               // console.log("yieldValue", yieldValue);
                item.yield = yieldValue;
                item.profit = Number(yieldTable[index - 1]?.profit) + yieldValue;
             }
@@ -184,7 +184,7 @@ const SunPanelsPage = () => {
          const nettoYield = yieldTable[24]?.profit as number + watch("investment")
          setValue("nettoYield", nettoYield);
          setValue("realizedReturn", (Math.pow((yieldTable[24]?.profit as number + watch("investment")) / watch("investment"), 1 / 25) * 100) - 100);
-         console.log("yieldTable", yieldTable);
+         // console.log("yieldTable", yieldTable);
 
          return yieldTable;
 
