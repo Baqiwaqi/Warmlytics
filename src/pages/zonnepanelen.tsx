@@ -195,10 +195,10 @@ const SunPanelsPage = () => {
    }, [watch("investment"), watch("thisYearPercentage"), watch("feedRate"), watch("inflationRate"), watch("priceKWH"), feedIn, selfConsumption, setValue]);
 
 
-   const sendResults = api.solarpanels.emailResulter.useMutation()
+   const { mutateAsync: sendResults, isLoading } = api.solarpanels.emailResulter.useMutation()
 
    const onSubmit = async (data: SunPanelsPageProps) => {
-      await sendResults.mutateAsync({
+      await sendResults({
          email: data.email,
          panels: data.panels,
          peakPower: data.peakPower,
@@ -343,9 +343,23 @@ const SunPanelsPage = () => {
                      />
                   </CustomFormControl>
                </div>
-               <label htmlFor="my-modal" className="btn btn-primary btn-sm mt-8">
-                  Resultaat Berekenen
-               </label>
+               {!isLoading &&
+                  <label htmlFor="my-modal" className="btn btn-primary btn-sm mt-8 disabled:opacity-50" >
+                     Resultaat Berekenen
+                  </label>
+               }
+               {isLoading &&
+                  <button
+                     type="button"
+                     disabled={isLoading}
+                     className={`btn btn-sm btn-primary w-full ${isLoading ? "cursor-not-allowed disabled:" : ""}`}
+                  >
+                     <svg className="animate-spin h-5 w-5 mr-3 -ml-1 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"></path>
+                     </svg>
+                  </button>
+               }
             </div>
          </main>
 
@@ -414,7 +428,7 @@ const SunPanelsPage = () => {
          <pre>
             {JSON.stringify(yieldTable, null, 2)}
          </pre> */}
-      </Layout>
+      </Layout >
    )
 }
 
