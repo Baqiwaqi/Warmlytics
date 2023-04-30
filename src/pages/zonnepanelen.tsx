@@ -12,7 +12,7 @@ import CustomFormControl from '~/components/common/form-control';
 import Layout from '~/components/layout/main';
 import { api } from '~/utils/api';
 import { currencyFormatter } from '~/utils/formatters';
-import { calculateYearPercentage } from '~/utils/helpers';
+import { calculateYearPercentage, getPercentage } from '~/utils/helpers';
 
 type SunPanelsPageProps = {
    panels: number;
@@ -131,8 +131,8 @@ const SunPanelsPage = () => {
             }
 
             // Calculate rendemenet goes 100 to 80 in 25 years
-            // const y = 20 / 25;
-            // const rendement = (100 - (y * (index))) / 100;
+            const y = 20 / 25;
+            const rendement = (100 - (y * (index))) / 100;
             // console.log("rendement", rendement);
 
             const factor = item.factor
@@ -157,13 +157,13 @@ const SunPanelsPage = () => {
 
             if (index === 0) {
 
-               const yieldValue = sum * percentage * item.inflationRate;
+               const yieldValue = sum * percentage * item.inflationRate * rendement;
                // console.log("yieldValue", yieldValue);
                item.yield = yieldValue;
                item.profit = yieldValue - investment;
 
             } else {
-               const yieldValue = sum * item.inflationRate;
+               const yieldValue = sum * item.inflationRate * rendement;
                // console.log("yieldValue", yieldValue);
                item.yield = yieldValue;
                item.profit = Number(yieldTable[index - 1]?.profit) + yieldValue;
@@ -171,21 +171,14 @@ const SunPanelsPage = () => {
 
          })
 
-         // lessEnergieCosts: 0,
-         // firstYearProfit: 0,
-         // nettoYieldAfter25: 0,
-         // nettoYield: 0,
-         // realizedReturn: 0,
-         // set values
-         // to many rerenders
          setValue("lessEnergieCosts", yieldTable[1]?.yield as number);
          setValue("firstYearProfit", yieldTable.find((item) => Number(item.profit) > 0)?.year as number);
          setValue("nettoYieldAfter25", yieldTable[24]?.profit as number);
          const nettoYield = yieldTable[24]?.profit as number + watch("investment")
          setValue("nettoYield", nettoYield);
          setValue("realizedReturn", (Math.pow((yieldTable[24]?.profit as number + watch("investment")) / watch("investment"), 1 / 25) * 100) - 100);
-         // console.log("yieldTable", yieldTable);
 
+         console.log("yieldTable", yieldTable);
          return yieldTable;
 
       };
@@ -280,7 +273,8 @@ const SunPanelsPage = () => {
                         selected={watch("installDate")}
                         onChange={(date) => {
                            setValue("installDate", date as Date);
-                           const percentage = calculateYearPercentage(date as Date);
+                           const percentage = getPercentage(date as Date);
+                           // const percentage = calculateYearPercentage(date as Date);
                            setValue("thisYearPercentage", percentage);
 
                         }}
